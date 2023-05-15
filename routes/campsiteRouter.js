@@ -13,11 +13,22 @@ campsiteRouter
     })
     .get((req, res, next) => {
         Campsite.find()
+        .populate('comments.author')
         .then(campsites => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
             res.json(campsites);
         })
         .catch(err => next(err));
     })
+    //pre-Mongoose
+    // .get((req, res, next) => {
+    //     Campsite.find()
+    //     .then(campsites => {
+    //         res.json(campsites);
+    //     })
+    //     .catch(err => next(err));
+    // })
     .post(authenticate.verifyUser, (req, res, next) => {
         Campsite.create(req.body)
         .then(campsite => {
@@ -45,13 +56,25 @@ campsiteRouter
         res.setHeader('Content-Type', 'application/json');
         next();
     })
+    //Mongoose routes
     .get((req, res, next) => {
         Campsite.findById(req.params.campsiteId)
+        .populate('comments.author')
         .then(campsite => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
             res.json(campsite);
         })
         .catch(err => next(err));
     })
+    //pre-mongoose routes
+    // .get((req, res, next) => {
+    //     Campsite.findById(req.params.campsiteId)
+    //     .then(campsite => {
+    //         res.json(campsite);
+    //     })
+    //     .catch(err => next(err));
+    // })
     .post(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end(`POST operation not supported on /campsites/${req.params.campsiteId}`);
@@ -79,10 +102,14 @@ campsiteRouter
         res.setHeader('Content-Type', 'application/json');
         next();
     })
+    //Mongoose routes
     .get((req, res, next) => {
         Campsite.findById(req.params.campsiteId)
+        .populate('comments.author')
         .then(campsite => {
             if (campsite) {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
                 res.json(campsite.comments);
             } else {
                 err = new Error(`Campsite ${req.params.campsiteId} not found`);
@@ -92,10 +119,26 @@ campsiteRouter
         })
         .catch(err => next(err));
     })
+    //pre-Mongoose routes
+    // .get((req, res, next) => {
+    //     Campsite.findById(req.params.campsiteId)
+    //     .then(campsite => {
+    //         if (campsite) {
+    //             res.json(campsite.comments);
+    //         } else {
+    //             err = new Error(`Campsite ${req.params.campsiteId} not found`);
+    //             err.status = 404;
+    //             return next(err);
+    //         }
+    //     })
+    //     .catch(err => next(err));
+    // })
     .post(authenticate.verifyUser, (req, res, next) => {
         Campsite.findById(req.params.campsiteId)
         .then(campsite => {
             if (campsite) {
+                //Mongoose save the user.id to the author field
+                req.body.author = req.user._id;
                 campsite.comments.push(req.body);
                 campsite.save()
                 .then(campsite => {
@@ -143,6 +186,8 @@ campsiteRouter
     })
     .get((req, res, next) => {
         Campsite.findById(req.params.campsiteId)
+        //Mongoose populate comments
+        .populate('comments.author')
         .then(campsite => {
             if (campsite && campsite.comments.id(req.params.commentId)) {
                 res.json(campsite.comments.id(req.params.commentId));
