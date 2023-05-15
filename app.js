@@ -1,12 +1,13 @@
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
-var cookieParser = require("cookie-parser");
+// var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+// const session = require('express-session');
+// const FileStore = require('session-file-store')(session);
 const passport = require('passport');
-const authenticate = require('./authenticate');
+// const authenticate = require('./authenticate');
+const config = require('./config');
 
 //Routes
 var indexRouter = require("./routes/index");
@@ -18,7 +19,9 @@ const partnerRouter = require("./routes/partnerRouter");
 //MongoDB Server Configuration
 const mongoose = require("mongoose");
 
-const url = "mongodb://localhost:27017/nucampsite";
+//passport with jwt authentication
+const url = config.mongoUrl;
+// const url = "mongodb://localhost:27017/nucampsite";
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
     useFindAndModify: false,
@@ -160,37 +163,37 @@ app.use(express.urlencoded({ extended: false }));
 
 
 //Express-Session
-app.use(session({
-    name: 'session-id',
-    secret: '12345-67890-09876-54321',
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore()
-}));
+// app.use(session({
+//     name: 'session-id',
+//     secret: '12345-67890-09876-54321',
+//     saveUninitialized: false,
+//     resave: false,
+//     store: new FileStore()
+// }));
 
 //Passport
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 //non-static pages that dont need authorization
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
 //Passport
-function auth(req, res, next) {
-    console.log(req.user);
+// function auth(req, res, next) {
+//     console.log(req.user);
 
-    if (!req.user) {
-        const err = new Error('You are not authenticated!');                    
-        err.status = 401;
-        return next(err);
-    } else {
-        return next();
-    }
-}
+//     if (!req.user) {
+//         const err = new Error('You are not authenticated!');                    
+//         err.status = 401;
+//         return next(err);
+//     } else {
+//         return next();
+//     }
+// }
 
 //authorization
-app.use(auth);
+// app.use(auth);
 
 //Static Pages
 app.use(express.static(path.join(__dirname, "public")));
