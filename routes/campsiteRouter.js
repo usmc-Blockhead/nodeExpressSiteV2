@@ -11,6 +11,7 @@ campsiteRouter
         res.setHeader('Content-Type', 'application/json');
         next();
     })
+    //Mongoose routes
     .get((req, res, next) => {
         Campsite.find()
         .populate('comments.author')
@@ -39,6 +40,7 @@ campsiteRouter
     })
     .put(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
+        res.setHeader('Content-Type', 'text/plain');
         res.end('PUT operation not supported on /campsites');
     })
     .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
@@ -77,6 +79,7 @@ campsiteRouter
     // })
     .post(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
+        res.setHeader('Content-Type', 'text/plain');
         res.end(`POST operation not supported on /campsites/${req.params.campsiteId}`);
     })
     .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
@@ -155,6 +158,7 @@ campsiteRouter
     })
     .put(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
+        res.setHeader('Content-Type', 'text/plain');
         res.end(`PUT operation not supported on /campsites/${req.params.campsiteId}/comments`);
     })
     .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
@@ -207,6 +211,7 @@ campsiteRouter
     })
     .post(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
+        res.setHeader('Content-Type', 'text/plain');
         res.end(`POST operation not supported on /campsites/${req.params.campsiteId}/comments/${req.params.commentId}`);
     })
     .put(authenticate.verifyUser, (req, res, next) => {
@@ -232,14 +237,6 @@ campsiteRouter
                     err.status = 403;
                     return next(err);
                 }
-                if (req.body.text) {
-                    campsite.comments.id(req.params.commentId).text = req.body.text;
-                }
-                campsite.save()
-                .then(campsite => {
-                    res.json(campsite);
-                })
-                .catch(err => next(err));
             } else if (!campsite) {
                 err = new Error(`Campsite ${req.params.campsiteId} not found`);
                 err.status = 404;
