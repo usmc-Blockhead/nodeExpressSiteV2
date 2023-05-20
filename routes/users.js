@@ -2,11 +2,12 @@ const express = require('express');
 const User = require('../models/user');
 const passport = require('passport');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const router = express.Router();
 
 /* GET users listing with verifyAdmin middleware. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin,
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,
 (req, res, next) => {
     User.find()
     .then((users) => {
@@ -23,7 +24,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin,
 // });
 
 //Mongoose routes
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
     User.register(
         new User({username: req.body.username}),
         req.body.password,
@@ -79,7 +80,7 @@ router.post('/signup', (req, res) => {
 // });
 
 //passport with JWT authentication
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
   const token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
@@ -93,7 +94,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 //   res.json({success: true, status: 'You are successfully logged in!'});
 // });
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', cors.corsWithOptions, (req, res, next) => {
   if (req.session) {
       req.session.destroy();
       res.clearCookie('session-id');
